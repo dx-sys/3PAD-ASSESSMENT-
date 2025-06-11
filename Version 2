@@ -1,0 +1,31 @@
+import tkinter as tk
+from PIL import Image,ImageTk
+def testing():
+  print("testing")
+
+# Main window for Game 
+def main_window():
+  window = tk.Tk()
+  window.title("Trivial")
+  #Main window background
+  background_photo = tk.PhotoImage(file = "Trivial_main.gif")
+  width = background_photo.width()
+  height = background_photo.height()
+  window.geometry(f"{width}x{height}")
+  background_label = tk.Label(window, image=background_photo)
+  background_label.place(x=0,y=0,relwidth=1,relheight=1)
+  #Start Button
+  start_pil_image = Image.open("start_button.gif")
+  resized_start_pil_image = start_pil_image.resize((200,150))
+  start_button_photo = ImageTk.PhotoImage(resized_start_pil_image)
+  
+  start_button = tk.Button(window, image=start_button_photo, command=testing, borderwidth=0, bg="#684444")
+  start_button.image = start_button_photo
+  start_button.place(relx=0.5, rely=0.6, anchor="center")
+
+  #Score Button
+  score_button = tk.Button(window, text="SCORE", command = testing, font=("Arial", 16), bg="#684444",padx=20,pady=10)
+  score_button.place(relx=0.5,rely=0.7, anchor="center")
+  window.mainloop()
+
+main_window()
