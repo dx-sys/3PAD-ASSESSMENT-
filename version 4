@@ -1,0 +1,69 @@
+import tkinter as tk
+from PIL import Image,ImageTk
+def testing():
+  print("testing")
+def game_window():
+    game_window = tk.Toplevel()
+    game_window.title("Trivial")
+    game_window.resizable(False,False)
+    # Background image for new window
+    gamebg_photo = tk.PhotoImage(file="Grass.png")
+    game_window.geometry("1382x906")
+
+    bg_label = tk.Label(game_window, image=gamebg_photo)
+    bg_label.image = gamebg_photo 
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    # Add your game content here
+    label = tk.Label(game_window, text="Easy", font=("Arial", 24))
+    label.place(relx=0.5, rely=0.5, anchor="center")
+    
+# Main window for Game 
+def main_window():
+  window = tk.Tk()
+  window.title("Trivial")
+  #Main window background
+  background_photo = tk.PhotoImage(file = "Trivial_main.gif")
+  width = background_photo.width()
+  height = background_photo.height()
+  window.geometry(f"{width}x{height}")
+  window.resizable(False,False)
+  background_label = tk.Label(window, image=background_photo)
+  background_label.place(x=0,y=0,relwidth=1,relheight=1)
+  #Start Button
+  start_pil_image = Image.open("start_button.gif")
+  resized_start_pil_image = start_pil_image.resize((200,150))
+  start_button_photo = ImageTk.PhotoImage(resized_start_pil_image)
+  
+  start_button = tk.Button(window, image=start_button_photo, command=game_window, borderwidth=0, bg="#684444")
+  start_button.image = start_button_photo
+  start_button.place(relx=0.4, rely=0.7, anchor="center")
+
+  #Score Button
+  score_button_image = Image.open("score.png")
+  resized_score_button_image = score_button_image.resize((200,150))
+  score_button_photo = ImageTk.PhotoImage(resized_score_button_image)
+  
+  score_button = tk.Button(window, image=score_button_photo, command=testing, borderwidth=0, bg="#684444")
+  score_button.image = score_button_photo
+  score_button.place(relx=0.6, rely=0.7, anchor="center")
+  
+  #Instruction Button
+  instruction_image = Image.open("instruction.png")
+  resized_instruction_image = instruction_image.resize((200,150))
+  instruction_button_photo = ImageTk.PhotoImage(resized_instruction_image)
+  
+  instruction_button = tk.Button(window, image=instruction_button_photo, command=testing, borderwidth=0, bg="#684444")
+  instruction_button.image = instruction_button_photo
+  instruction_button.place(relx=0.6, rely=0.9, anchor="center")
+  #Quit Button
+  quit_image = Image.open("quit.png")
+  resized_quit_image = quit_image.resize((200,150))
+  quit_button_photo = ImageTk.PhotoImage(resized_quit_image)
+  
+  quit_button = tk.Button(window, image=quit_button_photo, command=testing, borderwidth=0, bg="#684444")
+  quit_button.image = quit_button_photo
+  quit_button.place(relx=0.4, rely=0.9, anchor="center")
+  window.mainloop()
+
+main_window()
