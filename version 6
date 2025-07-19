@@ -1,0 +1,190 @@
+#Author-Danne Darlin
+#Date-
+#Purpose- A themed maths game that gives off a retro feel to it
+
+import tkinter as tk
+from tkinter import messagebox, ttk
+from PIL import Image, ImageTk
+import random
+
+num = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+# Main window for game 
+def main_window():
+    window = tk.Tk()
+    window.title("Trivial")
+
+    background_photo = tk.PhotoImage(file="Trivial_main.gif")
+    window.geometry(f"{background_photo.width()}x{background_photo.height()}")
+    window.resizable(False, False)
+
+    background_label = tk.Label(window, image=background_photo)
+    background_label.image = background_photo
+    background_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    def open_game_window():
+        window.destroy()
+        game_window()
+
+    # Start Button
+    start_img = Image.open("start_button.gif").resize((200, 150))
+    start_button_photo = ImageTk.PhotoImage(start_img)
+    start_button = tk.Button(window, image=start_button_photo, command=open_game_window, borderwidth=0, bg="#684444")
+    start_button.image = start_button_photo
+    start_button.place(relx=0.4, rely=0.7, anchor="center")
+
+    # Score Button
+    score_img = Image.open("score.png").resize((200, 150))
+    score_button_photo = ImageTk.PhotoImage(score_img)
+    score_button = tk.Button(window, image=score_button_photo, command=testing, borderwidth=0, bg="#684444")
+    score_button.image = score_button_photo
+    score_button.place(relx=0.6, rely=0.7, anchor="center")
+
+    # Instruction Button
+    instruction_img = Image.open("instruction.png").resize((200, 150))
+    instruction_button_photo = ImageTk.PhotoImage(instruction_img)
+    instruction_button = tk.Button(window, image=instruction_button_photo, command=testing, borderwidth=0, bg="#684444")
+    instruction_button.image = instruction_button_photo
+    instruction_button.place(relx=0.6, rely=0.9, anchor="center")
+
+    # Quit Button
+    quit_img = Image.open("quit.png").resize((200, 150))
+    quit_button_photo = ImageTk.PhotoImage(quit_img)
+    quit_button = tk.Button(window, image=quit_button_photo, command=window.destroy, borderwidth=0, bg="#684444")
+    quit_button.image = quit_button_photo
+    quit_button.place(relx=0.4, rely=0.9, anchor="center")
+
+    window.mainloop()
+
+
+def testing():
+    print("testing")
+
+
+def game_window():
+    game_window = tk.Toplevel()
+    game_window.title("Trivial")
+    game_window.resizable(False, False)
+    game_window.geometry("1382x906")
+
+    # Background
+    gamebg_photo = tk.PhotoImage(file="Grass.png")
+    bg_label = tk.Label(game_window, image=gamebg_photo)
+    bg_label.image = gamebg_photo
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    # Enemy image
+    enemy_img = Image.open("Enemy_choice.png").resize((1900, 700))
+    enemy_photo = ImageTk.PhotoImage(enemy_img)
+    enemy_label = tk.Label(game_window, image=enemy_photo, bg="#33b033", borderwidth=0, highlightthickness=0)
+    enemy_label.image = enemy_photo
+    enemy_label.place(relx=0.5, rely=0.3, anchor="center")
+
+    # Difficulty selection
+    label = tk.Label(game_window, text="Choose Your Difficulty", font=("Courier", 48), bg="#33b033")
+    label.place(relx=0.5, rely=0.6, anchor="center")
+
+    difficulties = ["Easy", "Medium", "Hard"]
+    diff_combobox = ttk.Combobox(game_window, values=difficulties, state="readonly", font=("Courier", 35))
+    diff_combobox.place(relx=0.5, rely=0.8, anchor="center")
+
+    confirm_button = tk.Button(
+        game_window,
+        text="Confirm Difficulty",
+        font=("Courier", 25),
+        bg="#33b033",
+        command=lambda: chosen_diff(diff_combobox, game_window)
+    )
+    confirm_button.place(relx=0.5, rely=0.9, anchor="center")
+
+    # Go back button
+    def backtomain():
+        game_window.destroy()
+        main_window()
+
+    goback_img = Image.open("Gobackarrow.png").resize((200, 100))
+    goback_photo = ImageTk.PhotoImage(goback_img)
+    goback_button = tk.Button(game_window, image=goback_photo, command=backtomain, borderwidth=0, bg="#33b033")
+    goback_button.image = goback_photo
+    goback_button.place(relx=1, rely=1, anchor="se")
+
+
+def chosen_diff(diff_combobox, current_window):
+    difficulty = diff_combobox.get()
+    if difficulty == "Easy":
+        current_window.destroy()
+        easy_window()
+    elif difficulty == "Medium":
+        current_window.destroy()
+        medium_window()
+    elif difficulty == "Hard":
+        current_window.destroy()
+        hard_window()
+    else:
+        messagebox.showerror("Error", "Please select a difficulty")
+
+
+def easy_window():
+    easy_win = tk.Tk()
+    easy_win.title("Easy Mode")
+    easy_win.geometry("400x400")
+    easy_win.configure(bg="#d3f9d8")
+
+    num1 = random.choice(num)
+    num2 = random.choice(num)
+
+    question_label = tk.Label(easy_win, text=f"{num1} + {num2}", font=("Courier", 24), bg="#d3f9d8")
+    question_label.place(relx=0.25, rely=0.15)
+
+    result_label = tk.Label(easy_win, text="", font=("Courier", 16), bg="#d3f9d8")
+    result_label.place(relx=0.3, rely=0.25)
+
+    answer_entry = tk.Entry(easy_win, font=("Courier", 18))
+    answer_entry.place(relx=0.3, rely=0.35, relwidth=0.4)
+
+    def submit_answer():
+        try:
+            user_input = int(answer_entry.get())
+            if user_input == num1 + num2:
+                result_label.config(text="Correct!", fg="green")
+            else:
+                result_label.config(text="Wrong!", fg="red")
+        except ValueError:
+            result_label.config(text="Enter a number", fg="orange")
+
+    def try_again():
+        nonlocal num1, num2
+        num1 = random.choice(num)
+        num2 = random.choice(num)
+        question_label.config(text=f"{num1} + {num2}")
+        result_label.config(text="")
+        answer_entry.delete(0, tk.END)
+
+    submit_button = tk.Button(easy_win, text="Submit", font=("Courier", 16), command=submit_answer)
+    submit_button.place(relx=0.35, rely=0.55)
+
+    try_button = tk.Button(easy_win, text="Try Again", font=("Courier", 14), command=try_again)
+    try_button.place(relx=0.36, rely=0.75)
+
+    def backtomain():
+        easy_win.destroy()
+        main_window()
+
+    back_img = Image.open("Gobackarrow.png").resize((80, 40))
+    back_photo = ImageTk.PhotoImage(back_img)
+    back_button = tk.Button(easy_win, image=back_photo, command=backtomain, borderwidth=0)
+    back_button.image = back_photo
+    back_button.place(relx=0.02, rely=0.02)
+
+    easy_win.mainloop()
+
+
+def medium_window():
+    print("Medium.")
+
+
+def hard_window():
+    print("Hard.")
+
+
+main_window()
