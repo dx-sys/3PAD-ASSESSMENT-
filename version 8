@@ -1,0 +1,396 @@
+#Author-Danne Darlin
+#Date-
+#Purpose- A themed maths game that gives off a retro feel to it
+
+import tkinter as tk
+from tkinter import messagebox, ttk
+from PIL import Image, ImageTk
+import random
+
+num = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+# Main window for game 
+def main_window():
+    window = tk.Tk()
+    window.title("Trivial")
+
+    background_photo = tk.PhotoImage(file="Trivial_main.gif")
+    window.geometry(f"{background_photo.width()}x{background_photo.height()}")
+    window.resizable(False, False)
+
+    background_label = tk.Label(window, image=background_photo)
+    background_label.image = background_photo
+    background_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    def open_game_window():
+        window.destroy()
+        game_window()
+
+    # Start Button
+    start_img = Image.open("start_button.gif").resize((200, 150))
+    start_button_photo = ImageTk.PhotoImage(start_img)
+    start_button = tk.Button(window, image=start_button_photo, command=open_game_window, borderwidth=0, bg="#684444")
+    start_button.image = start_button_photo
+    start_button.place(relx=0.4, rely=0.7, anchor="center")
+
+    # Score Button
+    score_img = Image.open("score.png").resize((200, 150))
+    score_button_photo = ImageTk.PhotoImage(score_img)
+    score_button = tk.Button(window, image=score_button_photo, command=score_window, borderwidth=0, bg="#684444")
+    score_button.image = score_button_photo
+    score_button.place(relx=0.6, rely=0.7, anchor="center")
+
+    # Instruction Button
+    instruction_img = Image.open("instruction.png").resize((200, 150))
+    instruction_button_photo = ImageTk.PhotoImage(instruction_img)
+    instruction_button = tk.Button(window, image=instruction_button_photo, command=testing, borderwidth=0, bg="#684444")
+    instruction_button.image = instruction_button_photo
+    instruction_button.place(relx=0.6, rely=0.9, anchor="center")
+
+    # Quit Button
+    quit_img = Image.open("quit.png").resize((200, 150))
+    quit_button_photo = ImageTk.PhotoImage(quit_img)
+    quit_button = tk.Button(window, image=quit_button_photo, command=window.destroy, borderwidth=0, bg="#684444")
+    quit_button.image = quit_button_photo
+    quit_button.place(relx=0.4, rely=0.9, anchor="center")
+
+    window.mainloop()
+
+
+def testing():
+    print("testing")
+
+
+def game_window():
+    game_window = tk.Toplevel()
+    game_window.title("Trivial")
+    game_window.resizable(False, False)
+    game_window.geometry("1382x906")
+
+    # Background
+    gamebg_photo = tk.PhotoImage(file="Grass.png")
+    bg_label = tk.Label(game_window, image=gamebg_photo)
+    bg_label.image = gamebg_photo
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    # Enemy image
+    enemy_img = Image.open("Enemy_choice.png").resize((1900, 700))
+    enemy_photo = ImageTk.PhotoImage(enemy_img)
+    enemy_label = tk.Label(game_window, image=enemy_photo, bg="#33b033", borderwidth=0, highlightthickness=0)
+    enemy_label.image = enemy_photo
+    enemy_label.place(relx=0.5, rely=0.3, anchor="center")
+
+    # Difficulty selection
+    label = tk.Label(game_window, text="Choose Your Difficulty", font=("Courier", 48), bg="#33b033")
+    label.place(relx=0.5, rely=0.6, anchor="center")
+
+    difficulties = ["Easy", "Medium", "Hard"]
+    diff_combobox = ttk.Combobox(game_window, values=difficulties, state="readonly", font=("Courier", 35))
+    diff_combobox.place(relx=0.5, rely=0.8, anchor="center")
+
+    confirm_button = tk.Button(
+        game_window,
+        text="Confirm Difficulty",
+        font=("Courier", 25),
+        bg="#33b033",
+        command=lambda: chosen_diff(diff_combobox, game_window)
+    )
+    confirm_button.place(relx=0.5, rely=0.9, anchor="center")
+
+    # Go back button
+    def backtomain():
+        game_window.destroy()
+        main_window()
+
+    goback_img = Image.open("Gobackarrow.png").resize((200, 100))
+    goback_photo = ImageTk.PhotoImage(goback_img)
+    goback_button = tk.Button(game_window, image=goback_photo, command=backtomain, borderwidth=0, bg="#33b033")
+    goback_button.image = goback_photo
+    goback_button.place(relx=1, rely=1, anchor="se")
+
+
+def chosen_diff(diff_combobox, current_window):
+    difficulty = diff_combobox.get()
+    if difficulty == "Easy":
+        current_window.destroy()
+        easy_window()
+    elif difficulty == "Medium":
+        current_window.destroy()
+        medium_window()
+    elif difficulty == "Hard":
+        current_window.destroy()
+        hard_window()
+    else:
+        messagebox.showerror("Error", "Please select a difficulty")
+
+
+def easy_window():
+    easy_win = tk.Tk()
+    easy_win.title("Easy Mode")
+    easy_win.geometry("400x400")
+    easy_win.configure(bg="#d3f9d8")
+
+    num1 = random.choice(num)
+    num2 = random.choice(num)
+
+    question_label = tk.Label(easy_win, text=f"{num1} + {num2}", font=("Courier", 24), bg="#d3f9d8")
+    question_label.place(relx=0.25, rely=0.15)
+
+    result_label = tk.Label(easy_win, text="", font=("Courier", 16), bg="#d3f9d8")
+    result_label.place(relx=0.3, rely=0.25)
+
+    answer_entry = tk.Entry(easy_win, font=("Courier", 18))
+    answer_entry.place(relx=0.3, rely=0.35, relwidth=0.4)
+
+    def submit_answer():
+        try:
+            user_input = int(answer_entry.get())
+            if user_input == num1 + num2:
+                result_label.config(text="Correct!", fg="green")
+            else:
+                result_label.config(text="Wrong!", fg="red")
+        except ValueError:
+            result_label.config(text="Enter a number", fg="orange")
+
+    def try_again():
+        nonlocal num1, num2
+        num1 = random.choice(num)
+        num2 = random.choice(num)
+        question_label.config(text=f"{num1} + {num2}")
+        result_label.config(text="")
+        answer_entry.delete(0, tk.END)
+
+    submit_button = tk.Button(easy_win, text="Submit", font=("Courier", 16), command=submit_answer)
+    submit_button.place(relx=0.35, rely=0.55)
+
+    try_button = tk.Button(easy_win, text="Try Again", font=("Courier", 14), command=try_again)
+    try_button.place(relx=0.36, rely=0.75)
+
+    def backtomain():
+        easy_win.destroy()
+        main_window()
+
+    back_img = Image.open("Gobackarrow.png").resize((80, 40))
+    back_photo = ImageTk.PhotoImage(back_img)
+    back_button = tk.Button(easy_win, image=back_photo, command=backtomain, borderwidth=0)
+    back_button.image = back_photo
+    back_button.place(relx=0.02, rely=0.02)
+
+    easy_win.mainloop()
+
+
+def medium_window():
+    medium_win = tk.Tk()
+    medium_win.title("Medium Mode")
+    medium_win.geometry("800x600")
+    medium_win.configure(bg="#d3f9d8")
+
+    # List of quiz questions with image and answer
+    quiz_questions = [
+        {"image": "fig1.png", "question": "What is the y-intercept?", "answer": "3"},
+        {"image": "fig2.png", "question": "What is the slope?", "answer": "-2"},
+        {"image": "fig3.png", "question": "What is the slope of the line?", "answer": "-4"},
+        {"image": "fig4.png", "question": "What is the y-intercept?", "answer": "4"}
+    ]
+
+    question_number = 0
+    score = 0
+
+    # Question text
+    question_text = tk.Label(medium_win, text="", font=("Courier", 16), bg="#d3f9d8")
+    question_text.pack(pady=20)
+
+    # Image display
+    picture = tk.Label(medium_win, bg="#d3f9d8")
+    picture.pack(pady=10)
+
+    # Answer entry
+    answer_box = tk.Entry(medium_win, font=("Courier", 14))
+    answer_box.pack(pady=10)
+
+    # Score display
+    score_display = tk.Label(medium_win, text="Score: 0", font=("Courier", 12), bg="#d3f9d8")
+    score_display.pack(pady=10)
+
+    def show_next_question():
+        nonlocal question_number
+        if question_number < len(quiz_questions):
+            current = quiz_questions[question_number]
+            question_text.config(text=f"Question {question_number + 1}: {current['question']}")
+            
+            try:
+                img = Image.open(current["image"])
+                img = img.resize((400, 300), Image.LANCZOS)
+                photo = ImageTk.PhotoImage(img)
+                picture.config(image=photo)
+                picture.image = photo
+            except FileNotFoundError:
+                picture.config(text="Image not available", image='')
+            
+            answer_box.delete(0, tk.END)
+            answer_box.focus()
+        else:
+            messagebox.showinfo("Quiz Complete", f"Your final score: {score}/{len(quiz_questions)}")
+            medium_win.destroy()
+            main_window()
+
+    def check_answer():
+        nonlocal question_number, score
+        student_answer = answer_box.get().strip()
+        correct_answer = quiz_questions[question_number]["answer"]
+        
+        if student_answer == correct_answer:
+            score += 1
+            messagebox.showinfo("Result", "Correct!")
+        else:
+            messagebox.showinfo("Result", f"Incorrect. The answer was {correct_answer}")
+        
+        score_display.config(text=f"Score: {score}")
+        question_number += 1
+        show_next_question()
+
+    # Submit button
+    submit_button = tk.Button(medium_win, text="Submit Answer", font=("Courier", 14), 
+                            command=check_answer, bg="#33b033", fg="white")
+    submit_button.pack(pady=20)
+
+    # Back button
+    back_button = tk.Button(medium_win, text="Main Menu", font=("Courier", 12), 
+                          command=medium_win.destroy, bg="#684444", fg="white")
+    back_button.pack(pady=10)
+
+    # Start the first question
+    show_next_question()
+
+    medium_win.mainloop()
+
+def hard_window():
+    hard_win = tk.Tk()
+    hard_win.title("Hard Mode Challenge")
+    hard_win.geometry("900x700")
+    hard_win.configure(bg="#d3f9d8")
+
+    # Hard mode questions - more challenging graphs
+    hard_questions = [
+        {"image": "hard1.png", "question": "Find the equation of this line (y=mx+b):", "answer": "y=2x+1"},
+        {"image": "hard2.png", "question": "What's the x-intercept of this graph?", "answer": "3"},
+        {"image": "hard3.png", "question": "Calculate the slope between the two points shown:", "answer": "1.5"},
+        {"image": "hard4.png", "question": "What's the vertex of this parabola?", "answer": "(2,-3)"}
+    ]
+
+    # Game variables
+    current_question = 0
+    player_score = 0
+    time_left = 30  # 30 seconds per question for hard mode
+
+    # Question display
+    question_label = tk.Label(hard_win, text="", font=("Courier", 18), bg="#d3f9d8")
+    question_label.pack(pady=15)
+
+    # Image display
+    graph_image = tk.Label(hard_win, bg="#d3f9d8")
+    graph_image.pack(pady=10)
+
+    # Timer display
+    timer_label = tk.Label(hard_win, text=f"Time: {time_left}s", font=("Courier", 14), bg="#d3f9d8")
+    timer_label.pack()
+
+    # Answer entry
+    answer_entry = tk.Entry(hard_win, font=("Courier", 16), width=25)
+    answer_entry.pack(pady=15)
+
+    # Score display
+    score_label = tk.Label(hard_win, text=f"Score: {player_score}/{len(hard_questions)}", 
+                         font=("Courier", 14), bg="#d3f9d8")
+    score_label.pack()
+
+    def load_question():
+        nonlocal current_question, time_left
+        if current_question < len(hard_questions):
+            question = hard_questions[current_question]
+            question_label.config(text=f"Question {current_question+1}: {question['question']}")
+            
+            try:
+                img = Image.open(question["image"])
+                img = img.resize((450, 300), Image.LANCZOS)
+                photo = ImageTk.PhotoImage(img)
+                graph_image.config(image=photo)
+                graph_image.image = photo
+            except:
+                graph_image.config(text="[Graph Image]", image='')
+            
+            answer_entry.delete(0, tk.END)
+            answer_entry.focus()
+            time_left = 30
+            update_timer()
+        else:
+            messagebox.showinfo("Challenge Complete!", 
+                               f"Final Score: {player_score}/{len(hard_questions)}")
+            hard_win.destroy()
+            main_window()
+
+    def check_answer():
+        nonlocal current_question, player_score
+        user_answer = answer_entry.get().strip()
+        correct_answer = hard_questions[current_question]["answer"]
+        
+        if user_answer.lower() == correct_answer.lower():
+            player_score += 1
+            messagebox.showinfo("Correct!", "Well done! +1 point")
+        else:
+            messagebox.showinfo("Incorrect", f"The answer was: {correct_answer}")
+        
+        score_label.config(text=f"Score: {player_score}/{len(hard_questions)}")
+        current_question += 1
+        load_question()
+
+    def update_timer():
+        nonlocal time_left
+        if time_left > 0:
+            time_left -= 1
+            timer_label.config(text=f"Time: {time_left}s")
+            hard_win.after(1000, update_timer)
+        else:
+            messagebox.showinfo("Time's Up!", "Moving to next question...")
+            current_question += 1
+            load_question()
+
+    # Submit button
+    submit_btn = tk.Button(hard_win, text="Submit Answer", font=("Courier", 14),
+                         command=check_answer, bg="#33b033", fg="white")
+    submit_btn.pack(pady=10)
+
+    # Back button
+    back_btn = tk.Button(hard_win, text="Quit Challenge", font=("Courier", 12),
+                        command=hard_win.destroy, bg="#684444", fg="white")
+    back_btn.pack(pady=10)
+
+    # Start the first question
+    load_question()
+
+    hard_win.mainloop()
+def score_window():
+    score_win = tk.Toplevel()
+    score_win.title("High Scores")
+    score_win.configure(bg="#684444")
+    score_win.geometry("500x400")
+    
+    # Title label
+    title_label = tk.Label(score_win, text="High Scores", fg="white", bg="#684444", font=("Courier", 24))
+    title_label.pack(pady=20)
+
+    # Sample scores (you can replace with actual score data later)
+    scores = [
+        {"difficulty": "Easy", "score": "100"},
+        {"difficulty": "Medium", "score": "75"}, 
+        {"difficulty": "Hard", "score": "50"}
+    ]
+
+    # Display scores
+    for i, score in enumerate(scores):
+        tk.Label(score_win,text=f"{score['difficulty']}: {score['score']}", fg="white", bg="#684444", font=("Courier", 16)).pack(pady=10)
+    # Close button
+    close_button = tk.Button(score_win, text="Close",command=score_win.destroy, bg="#33b033", fg="white", font=("Courier", 14),width=10)
+    close_button.pack(pady=20)
+
+main_window()
