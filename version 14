@@ -1,0 +1,584 @@
+# Author - Danne Darlin
+# Date -
+# Purpose - A themed maths game that gives off a retro feel to it
+
+import tkinter as tk
+from tkinter import messagebox, ttk
+from PIL import Image, ImageTk
+import random
+
+# Global variables
+username = "Player"
+SCORES_FILE = "trivial.txt"
+num = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+root = None  
+
+#this code writes the scores from the difficulty windows
+def save_score(difficulty, score):
+    try:
+        with open(SCORES_FILE, "a") as file:
+            file.write(f"{username},{difficulty},{score}\n")
+    except Exception as e:
+        print(f"Error saving score: {e}")
+        
+#this code reads the the information in the text file and displays it when its called
+def load_scores():
+    scores = {}
+    try:
+        with open(SCORES_FILE, "r") as file:
+            for line in file:
+                if line.strip():
+                    name, diff, scr = line.strip().split(',')
+                    if name not in scores:
+                        scores[name] = {"Easy": 0, "Medium": 0, "Hard": 0}
+                    scores[name][diff] += int(scr)
+    except FileNotFoundError:
+        pass  # File doesn't exist yet
+    except Exception as e:
+        print(f"Error loading scores: {e}")
+    return scores
+
+#this function is to clear windows so screen wont be clutterd 
+def clear_window(window):
+    for widget in window.winfo_children():
+        widget.destroy()
+
+#this is the window where user name is added and window where the code starts 
+def username_window():
+    global username, root
+    
+    root = tk.Tk()
+    root.title("Trivial")
+    root.geometry("400x300")
+    root.configure(bg="#d3f9d8")
+    root.resizable(False, False)
+
+    welcome_label = tk.Label(root, text="Trivial!", font=("Courier", 20), bg="#d3f9d8")
+    welcome_label.pack(pady=20)
+
+    instr_label = tk.Label(root, text="Please enter your name:", font=("Courier", 14), bg="#d3f9d8")
+    instr_label.pack(pady=10)
+
+    name_entry = tk.Entry(root, font=("Courier", 16), justify='center')
+    name_entry.pack(pady=10)
+    name_entry.focus()
+
+#this function is used to takes the user to the main window and also write the player name to the text file. 
+    def start_game():
+        global username
+        name = name_entry.get().strip()
+        if name:
+            username = name
+            clear_window(root)
+            main_window()
+            
+        else:
+            messagebox.showwarning("No Name", "Please enter your name to continue")
+
+    start_button = tk.Button(root, text="Start Game", font=("Courier", 14), command=start_game, bg="#33b033", fg="white")
+    start_button.pack(pady=20)
+    
+    root.mainloop()
+
+#this is the main window in my the hub to get to all the parts of the program
+def main_window():
+    global root
+    
+    clear_window(root)
+    root.title("Trivial")
+
+    try:
+        background_photo = tk.PhotoImage(file="Trivial_main.gif")
+        root.geometry(f"{background_photo.width()}x{background_photo.height()}")
+        
+        background_label = tk.Label(root, image=background_photo)
+        background_label.image = background_photo
+        background_label.place(x=0, y=0, relwidth=1, relheight=1)
+    except:
+        root.geometry("800x600")
+        background_label = tk.Label(root, text="Trivial", font=("Courier", 48), bg="#684444", fg="white")
+        background_label.pack(fill=tk.BOTH, expand=True)
+
+    def open_game_window():
+        clear_window(root)
+        game_window()
+
+    try:
+        start_img = Image.open("start_button.gif").resize((200, 150))
+        start_button_photo = ImageTk.PhotoImage(start_img)
+        start_button = tk.Button(root, image=start_button_photo, command=open_game_window, borderwidth=0, bg="#684444")
+        start_button.image = start_button_photo
+        start_button.place(relx=0.4, rely=0.7, anchor="center")
+    except:
+        start_button = tk.Button(root, text="Start Game", font=("Courier", 16), command=open_game_window, bg="#33b033", fg="white")
+        start_button.place(relx=0.4, rely=0.7, anchor="center")
+
+    try:
+        score_img = Image.open("score.png").resize((200, 150))
+        score_button_photo = ImageTk.PhotoImage(score_img)
+        score_button = tk.Button(root, image=score_button_photo, command=score_window, borderwidth=0, bg="#684444")
+        score_button.image = score_button_photo
+        score_button.place(relx=0.6, rely=0.7, anchor="center")
+    except:
+        score_button = tk.Button(root, text="Scores", font=("Courier", 16), command=score_window, bg="#33b033", fg="white")
+        score_button.place(relx=0.6, rely=0.7, anchor="center")
+
+    try:
+        instruction_img = Image.open("instruction.png").resize((200, 150))
+        instruction_button_photo = ImageTk.PhotoImage(instruction_img)
+        instruction_button = tk.Button(root, image=instruction_button_photo, command=instructions, borderwidth=0, bg="#684444")
+        instruction_button.image = instruction_button_photo
+        instruction_button.place(relx=0.6, rely=0.9, anchor="center")
+    except:
+        instruction_button = tk.Button(root, text="Instructions", font=("Courier", 16), command=instructions, bg="#33b033", fg="white")
+        instruction_button.place(relx=0.6, rely=0.9, anchor="center")
+
+    try:
+        quit_img = Image.open("quit.png").resize((200, 150))
+        quit_button_photo = ImageTk.PhotoImage(quit_img)
+        quit_button = tk.Button(root, image=quit_button_photo, command=root.destroy, borderwidth=0, bg="#684444")
+        quit_button.image = quit_button_photo
+        quit_button.place(relx=0.4, rely=0.9, anchor="center")
+    except:
+        quit_button = tk.Button(root, text="Quit", font=("Courier", 16), command=root.destroy, bg="#684444", fg="white")
+        quit_button.place(relx=0.4, rely=0.9, anchor="center")
+#window for instructions
+def instructions():
+    global root
+    clear_window(root)
+    root.title("Trivial")
+    root.geometry("700x1100")
+    
+    instruction_img = Image.open("ins.png").resize((499, 600))
+    instruction_photo = ImageTk.PhotoImage(instruction_img)
+    instruction_label = tk.Label(root, image=instruction_photo, bg="#d3f9d8", borderwidth=0, highlightthickness=0)
+    instruction_label.image = instruction_photo
+    instruction_label.place(relx=0.5, rely=0.5, anchor="center")        
+#this is the window where the user can select what difficulty they want
+def game_window():
+    global root
+    
+    clear_window(root)
+    root.title("Trivial")
+    root.geometry("1382x906")
+
+    try:
+        gamebg_photo = tk.PhotoImage(file="Grass.png")
+        bg_label = tk.Label(root, image=gamebg_photo)
+        bg_label.image = gamebg_photo
+        bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+    except:
+        bg_label = tk.Label(root, text="Game Window", font=("Courier", 48), bg="#33b033", fg="white")
+        bg_label.pack(fill=tk.BOTH, expand=True)
+
+    try:
+        enemy_img = Image.open("Enemy_choice.png").resize((1900, 700))
+        enemy_photo = ImageTk.PhotoImage(enemy_img)
+        enemy_label = tk.Label(root, image=enemy_photo, bg="#33b033", borderwidth=0, highlightthickness=0)
+        enemy_label.image = enemy_photo
+        enemy_label.place(relx=0.5, rely=0.3, anchor="center")
+    except:
+        enemy_label = tk.Label(root, text="Choose Difficulty", font=("Courier", 36), bg="#33b033", fg="white")
+        enemy_label.place(relx=0.5, rely=0.3, anchor="center")
+
+    label = tk.Label(root, text="Choose Your Difficulty", font=("Courier", 48), bg="#33b033")
+    label.place(relx=0.5, rely=0.6, anchor="center")
+
+    difficulties = ["Easy", "Medium", "Hard"]
+    diff_combobox = ttk.Combobox(root, values=difficulties, state="readonly", font=("Courier", 35))
+    diff_combobox.place(relx=0.5, rely=0.8, anchor="center")
+
+    confirm_button = tk.Button(root, text="Confirm", font=("Courier", 25), command=lambda: chosen_diff(diff_combobox), bg="#33b033")
+    confirm_button.place(relx=0.5, rely=0.9, anchor="center")
+
+    def backtomain():
+        clear_window(root)
+        main_window()
+
+    try:
+        goback_img = Image.open("Gobackarrow.png").resize((200, 100))
+        goback_photo = ImageTk.PhotoImage(goback_img)
+        goback_button = tk.Button(root, image=goback_photo, command=backtomain, borderwidth=0, bg="#33b033")
+        goback_button.image = goback_photo
+        goback_button.place(relx=1, rely=1, anchor="se")
+    except:
+        goback_button = tk.Button(root, text="Back", font=("Courier", 14), command=backtomain, bg="#684444", fg="white")
+        goback_button.place(relx=1, rely=1, anchor="se")
+
+#this function decides form the user inout from the combobox if they should be taken to the chosen difficulty.
+def chosen_diff(diff_combobox):
+    difficulty = diff_combobox.get()
+    
+    if difficulty == "Easy":
+        easy_window()
+        
+    elif difficulty == "Medium":
+        medium_window()
+        
+    elif difficulty == "Hard":
+        hard_window()
+        
+    else:
+        messagebox.showerror("","Please select a difficulty, Thank youu")
+
+#this function is for the easy window and it will pull its numbers from the list at the top
+def easy_window():
+    global root
+    
+    clear_window(root)
+    root.title("Easy Mode - 3 Lives")
+    root.geometry("500x500")
+    root.configure(bg="#d3f9d8")
+
+    num1 = random.choice(num)
+    num2 = random.choice(num)
+    quiz_lives = 3
+    player_lives = 3
+
+    quiz_health_frame = tk.Frame(root, bg="#d3f9d8")
+    quiz_health_frame.pack(pady=10)
+    tk.Label(quiz_health_frame, text="Quiz Health:", font=("Courier", 12), bg="#d3f9d8").pack(side=tk.LEFT)
+    quiz_health = tk.Label(quiz_health_frame, text="♥ ♥ ♥", font=("Courier", 16), fg="red", bg="#d3f9d8")
+    quiz_health.pack(side=tk.LEFT)
+
+    player_health_frame = tk.Frame(root, bg="#d3f9d8")
+    player_health_frame.pack(pady=5)
+    tk.Label(player_health_frame, text="Your Lives:", font=("Courier", 12), bg="#d3f9d8").pack(side=tk.LEFT)
+    player_health = tk.Label(player_health_frame, text="♥ ♥ ♥", font=("Courier", 16), fg="blue", bg="#d3f9d8")
+    player_health.pack(side=tk.LEFT)
+
+    question_label = tk.Label(root, text=f"{num1} + {num2}", font=("Courier", 24), bg="#d3f9d8")
+    question_label.pack(pady=15)
+
+    answer_entry = tk.Entry(root, font=("Courier", 18))
+    answer_entry.pack(pady=10)
+    answer_entry.focus()
+
+    result_label = tk.Label(root, text="", font=("Courier", 14), bg="#d3f9d8")
+    result_label.pack()
+    
+
+    def update_health():
+        quiz_health.config(text="♥" * quiz_lives)
+        player_health.config(text="♥" * player_lives)
+        
+        if quiz_lives <= 0:
+            save_score("Easy", 200)
+            messagebox.showinfo("","You WONNNN Keep it up")
+            clear_window(root)
+            main_window()
+            
+        elif player_lives <= 0:
+            messagebox.showinfo("", " Sorryy, You ran out of lives!")
+            clear_window(root)
+            main_window()
+
+    def check_answer():
+        nonlocal num1, num2, quiz_lives, player_lives
+        
+        try:
+            user_answer = int(answer_entry.get())
+            if user_answer == num1 + num2:
+                quiz_lives -= 1
+                result_label.config(text="Correct! -1 quiz life", fg="green")
+                
+            else:
+                player_lives -= 1
+                result_label.config(text="Wrong answer, Answer was {num1+num2} -1 life", fg="red")
+            
+            update_health()
+            if quiz_lives > 0 and player_lives > 0:
+                num1 = random.choice(num)
+                num2 = random.choice(num)
+                question_label.config(text=f"{num1} + {num2}")
+                answer_entry.delete(0, tk.END)
+                
+        except ValueError:
+            result_label.config(text="Enter a number!", fg="orange")
+
+    submit_button = tk.Button(root, text="Submit", font=("Courier", 16), command=check_answer, bg="#33b033", fg="white")
+    submit_button.pack(pady=15)
+
+    def back_to_main():
+        clear_window(root)
+        main_window()
+
+    back_button = tk.Button(root, text="Quit", font=("Courier", 12), command=back_to_main, bg="#684444", fg="white")
+    back_button.pack(pady=10)
+    
+#this is the code or function to the medium window.
+def medium_window():
+    global root
+    
+    clear_window(root)
+    root.title("Medium Mode - 4 Lives")
+    root.geometry("800x650")
+    root.configure(bg="#d3f9d8")
+
+    quiz_questions = [
+        {"image": "med1.png", "question": "What is the y-intercept?", "answer": "9"},
+        {"image": "med2.png", "question": "What is the slope?", "answer": "3"},
+        {"image": "med3.png", "question": "What is the slope of the line?", "answer": "-0.5"},
+        {"image": "med4.png", "question": "What is the y-intercept?", "answer": "3"},
+        {"image": "med5.png", "question": "What is the x-intercept?", "answer": "3"},
+        {"image": "med6.png", "question": "What is the gradient of the line?", "answer": "-0.5"},
+        {"image": "med7.png", "question": "What is the x-intercept?", "answer": "-0.5"}
+    ]
+
+    current_question = 0
+    quiz_lives = 4
+    player_lives = 3
+
+    health_frame = tk.Frame(root, bg="#d3f9d8")
+    health_frame.pack(pady=10)
+    
+    quiz_health_frame = tk.Frame(health_frame, bg="#d3f9d8")
+    quiz_health_frame.pack(side=tk.LEFT, padx=20)
+    tk.Label(quiz_health_frame, text="Quiz Health:", font=("Courier", 12), bg="#d3f9d8").pack()
+    quiz_health = tk.Label(quiz_health_frame, text="♥ ♥ ♥ ♥", font=("Courier", 16), fg="red", bg="#d3f9d8")
+    quiz_health.pack()
+
+    player_health_frame = tk.Frame(health_frame, bg="#d3f9d8")
+    player_health_frame.pack(side=tk.LEFT, padx=20)
+    tk.Label(player_health_frame, text="Your Lives:", font=("Courier", 12), bg="#d3f9d8").pack()
+    player_health = tk.Label(player_health_frame, text="♥ ♥ ♥", font=("Courier", 16), fg="blue", bg="#d3f9d8")
+    player_health.pack()
+
+    question_text = tk.Label(root, text="", font=("Courier", 16), bg="#d3f9d8")
+    question_text.pack(pady=15)
+
+    picture = tk.Label(root, bg="#d3f9d8")
+    picture.pack(pady=10)
+
+    answer_box = tk.Entry(root, font=("Courier", 14))
+    answer_box.pack(pady=10)
+
+    def update_health():
+        quiz_health.config(text="♥" * quiz_lives)
+        player_health.config(text="♥" * player_lives)
+        
+        if quiz_lives <= 0:
+            save_score("Medium", 500)
+            messagebox.showinfo("","You WONNNN Keep it up")
+            clear_window(root)
+            main_window()
+            
+        elif player_lives <= 0:
+            messagebox.showinfo("", " Sorryy, You ran out of lives!")
+            clear_window(root)
+            main_window()
+
+    def load_question():
+        nonlocal current_question
+        
+        if current_question < len(quiz_questions) and quiz_lives > 0 and player_lives > 0:
+            question = quiz_questions[current_question]
+            question_text.config(text="Q{current_question+1}: {question['question']}")
+            
+            try:
+                img = Image.open(question["image"])
+                img = img.resize((400, 300), Image.LANCZOS)
+                photo = ImageTk.PhotoImage(img)
+                picture.config(image=photo)
+                picture.image = photo
+            except:
+                picture.config(text="[Graph Image]", image='')
+            
+            answer_box.delete(0, tk.END)
+            answer_box.focus()
+        else:
+            messagebox.showinfo("Quiz Complete", f"Final score: {len(quiz_questions) - quiz_lives}/{len(quiz_questions)}")
+            clear_window(root)
+            main_window()
+
+    def check_answer():
+        nonlocal current_question, quiz_lives, player_lives
+        
+        user_answer = answer_box.get().strip()
+        correct_answer = quiz_questions[current_question]["answer"]
+        
+        if user_answer == correct_answer:
+            quiz_lives -= 1
+            messagebox.showinfo("Correct!", "Quiz loses 1 life!")
+            
+        else:
+            player_lives -= 1
+            messagebox.showinfo("Incorrect", f"Wrong! You lose 1 life.\nCorrect answer: {correct_answer}")
+        
+        current_question += 1
+        update_health()
+        load_question()
+
+    submit_button = tk.Button(root, text="Submit", font=("Courier", 14), command=check_answer, bg="#33b033", fg="white")
+    submit_button.pack(pady=15)
+
+    def back_to_main():
+        clear_window(root)
+        main_window()
+
+    back_button = tk.Button(root, text="Quit", font=("Courier", 12), command=back_to_main, bg="#684444", fg="white")
+    back_button.pack(pady=10)
+
+    load_question()
+    
+#this is the function to run the hard window 
+def hard_window():
+    global root
+    
+    clear_window(root)
+    root.title("Hard Mode - 5 Lives")
+    root.geometry("900x750")
+    root.configure(bg="#d3f9d8")
+
+    hard_questions = [
+        {"image": "hard1.png", "question": "Double Differenciate this equation:", "answer": "2"},
+        {"question": "Differenciate x^2-3x+5 answer like(y=mx+c)", "answer": "y=2x-3"},
+        {"question": "x^2+4x+4||whats x?", "answer": "-2"},
+        {"question": "x^2-8x+16||whats x?", "answer": "4"},
+        {"question": "x^4+2x^2+5x+3|| find y when x is 3", "answer": "117"},
+        {"image": "hard2.png", "question": "Double Differenciate this equation:", "answer": "4"},
+        {"image": "hard3.png", "question": "Double Differenciate this equation:", "answer": "30x"},
+        {"question": "x^2+120x+3600||whats x?", "answer": "-60"},
+    ]
+
+    current_question = 0
+    quiz_lives = 5  
+    player_lives = 3  
+
+
+    health_frame = tk.Frame(root, bg="#d3f9d8")
+    health_frame.pack(pady=10)
+    
+    quiz_health_frame = tk.Frame(health_frame, bg="#d3f9d8")
+    quiz_health_frame.pack(side=tk.LEFT, padx=20)
+    tk.Label(quiz_health_frame, text="Quiz Health:", font=("Courier", 12), bg="#d3f9d8").pack()
+    quiz_health = tk.Label(quiz_health_frame, text="♥ ♥ ♥ ♥ ♥", font=("Courier", 16), fg="red", bg="#d3f9d8")
+    quiz_health.pack()
+
+    player_health_frame = tk.Frame(health_frame, bg="#d3f9d8")
+    player_health_frame.pack(side=tk.LEFT, padx=20)
+    tk.Label(player_health_frame, text="Your Lives:", font=("Courier", 12), bg="#d3f9d8").pack()
+    player_health = tk.Label(player_health_frame, text="♥ ♥ ♥", font=("Courier", 16), fg="blue", bg="#d3f9d8")
+    player_health.pack()
+
+
+    question_label = tk.Label(root, text="", font=("Courier", 18), bg="#d3f9d8")
+    question_label.pack(pady=15)
+
+
+    graph_image = tk.Label(root, bg="#d3f9d8")
+    graph_image.pack(pady=10)
+
+
+    answer_entry = tk.Entry(root, font=("Courier", 16), width=25)
+    answer_entry.pack(pady=15)
+
+    def update_health():
+        quiz_health.config(text="♥" * quiz_lives)
+        player_health.config(text="♥" * player_lives)
+        
+        if quiz_lives <= 0:
+            save_score("Hard", 1000)
+            messagebox.showinfo("","You WONNNN Keep it up")
+            clear_window(root)
+            main_window()
+            
+        elif player_lives <= 0:
+            messagebox.showinfo("", " Sorryy, You ran out of lives!")
+            clear_window(root)
+            main_window()
+
+    def next_question():
+        nonlocal current_question
+        current_question += 1
+        
+        if current_question < len(hard_questions) and quiz_lives > 0 and player_lives > 0:
+            load_question()
+            
+        else:
+            messagebox.showinfo("Complete", "Final score: {len(hard_questions) - quiz_lives}/{len(hard_questions)}")
+            clear_window(root)
+            main_window()
+
+    def load_question():
+        question = hard_questions[current_question]
+        question_label.config(text=f"Q{current_question+1}: {question['question']}")
+        
+        try:
+            img = Image.open(question["image"])
+            img = img.resize((450, 300), Image.LANCZOS)
+            photo = ImageTk.PhotoImage(img)
+            graph_image.config(image=photo)
+            graph_image.image = photo
+        except:
+            graph_image.config(text="[Graph Image]", image='')
+        
+        answer_entry.delete(0, tk.END)
+        answer_entry.focus()
+
+    def check_answer():
+        nonlocal quiz_lives, player_lives
+        
+        user_answer = answer_entry.get().strip()
+        correct_answer = hard_questions[current_question]["answer"]
+        
+        if user_answer.lower() == correct_answer.lower():
+            quiz_lives -= 1
+            messagebox.showinfo("Correct!", "Quiz loses 1 life!")
+            
+        else:
+            player_lives -= 1
+            messagebox.showinfo("Incorrect", f"Wrong! -1 life\nCorrect answer: {correct_answer}")
+        
+        update_health()
+        next_question()
+
+    submit_btn = tk.Button(root, text="Submit", font=("Courier", 14), command=check_answer, bg="#33b033", fg="white")
+    submit_btn.pack(pady=15)
+
+    def back_to_main():
+        clear_window(root)
+        main_window()
+
+    quit_btn = tk.Button(root, text="Quit", font=("Courier", 12), command=back_to_main, bg="#684444", fg="white")
+    quit_btn.pack(pady=10)
+
+    load_question()
+#this window is used to display the score by reading the text file
+def score_window():
+    score_win = tk.Toplevel(root)
+    score_win.title("High Scores")
+    score_win.configure(bg="#684444")
+    score_win.geometry("600x500")
+    
+    title_label = tk.Label(score_win, text="High Scores", fg="white", bg="#684444", font=("Courier", 24))
+    title_label.pack(pady=20)
+
+    scores = load_scores()
+    
+    scores_frame = tk.Frame(score_win, bg="#684444")
+    scores_frame.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+    
+    headers = ["Player", "Easy", "Medium", "Hard", "Total"]
+    for col, header in enumerate(headers):
+        tk.Label(scores_frame, text=header, fg="white", bg="#684444", font=("Courier", 14, "bold")).grid(row=0, column=col, padx=10, pady=5)
+    
+    for row, player in enumerate(sorted(scores.keys(), key=lambda x: sum(scores[x].values()), reverse=True)):
+        tk.Label(scores_frame, text=player, fg="white", bg="#684444", font=("Courier", 12)).grid(row=row+1, column=0, padx=10, pady=5)
+        
+        easy = scores[player].get("Easy", 0)
+        medium = scores[player].get("Medium", 0)
+        hard = scores[player].get("Hard", 0)
+        total = easy + medium + hard
+        
+        tk.Label(scores_frame, text=str(easy), fg="white", bg="#684444", font=("Courier", 12)).grid(row=row+1, column=1, padx=10, pady=5)
+        tk.Label(scores_frame, text=str(medium), fg="white", bg="#684444", font=("Courier", 12)).grid(row=row+1, column=2, padx=10, pady=5)
+        tk.Label(scores_frame, text=str(hard), fg="white", bg="#684444", font=("Courier", 12)).grid(row=row+1, column=3, padx=10, pady=5)
+        tk.Label(scores_frame, text=str(total), fg="gold", bg="#684444", font=("Courier", 12, "bold")).grid(row=row+1, column=4, padx=10, pady=5)
+    
+    close_button = tk.Button(score_win, text="Close", command=score_win.destroy, 
+                           bg="#33b033", fg="white", font=("Courier", 14), width=10)
+    close_button.pack(pady=20)
+
+
+username_window()
